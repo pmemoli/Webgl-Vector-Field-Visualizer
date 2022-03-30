@@ -187,4 +187,4 @@ function main(xComponent, yComponent, visAmplitude, restartPos, pointSize, color
     requestAnimationFrame(render);
 }   
 
-main("300.0", "300.0 * sin(x * x + y * y)", [50, 25], true, 1, [1, 1, 0.5, 1], 600000);
+main("x / sqrt(x * x)", "10.0 * sin(x * x + y * y)", [50, 25], true, 1, [1, 1, 0.5, 1], 600000);
