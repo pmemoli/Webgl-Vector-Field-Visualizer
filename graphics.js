@@ -7,8 +7,13 @@ uniform vec2 u_visAmplitude;
 uniform bool u_restartPos;
 out vec2 v_outPos;
 
-float rand(vec2 co){
-    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+highp float rand(vec2 co) {
+    highp float a = 12.9898;
+    highp float b = 78.233;
+    highp float c = 43758.5453;
+    highp float dt= dot(co.xy ,vec2(a,b));
+    highp float sn= mod(dt,3.14);
+    return fract(sin(sn) * c);
 }
 
 void main() {
@@ -182,4 +187,4 @@ function main(xComponent, yComponent, visAmplitude, restartPos, pointSize, color
     requestAnimationFrame(render);
 }   
 
-main("10.0*x", "3.0 * sin(y)", [50, 25], true, 1, [1, 0.5, 0.5, 1], 300000);
+main("300.0", "300.0 * sin(x * x + y * y)", [50, 25], true, 1, [1, 1, 0.5, 1], 600000);
