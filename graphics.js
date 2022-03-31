@@ -5,6 +5,7 @@ in vec2 a_position;
 uniform vec2 u_resolution;
 uniform vec2 u_visAmplitude;
 uniform bool u_restartPos;
+uniform float u_minSpeed;
 out vec2 v_outPos;
 
 highp float rand(vec2 co) {
@@ -26,7 +27,7 @@ void main() {
 
 const updateShaderSourceAfterSpeed = 
     `if (!u_restartPos || ((0.0 <= a_position.x) && (a_position.x <= u_resolution.x) &&
-    (0.0 <= a_position.y) && (a_position.y <= u_resolution.y) && distance(vec2(0.0, 0.0), velocity) > 1.0)) {
+    (0.0 <= a_position.y) && (a_position.y <= u_resolution.y) && distance(vec2(0.0, 0.0), velocity) > u_minSpeed)) {
         v_outPos = a_position + velocity * (0.01666666);  // Assumes 60fps
     }
     else {
@@ -61,8 +62,13 @@ void main() {
     outColor = u_color;
 }`;
 
+let lastFrameId = 0;
 
-function main(xComponent, yComponent, visAmplitude, restartPos, pointSize, color, particleAmount) {
+function main(xComponent, yComponent, visAmplitude, restartMode, pointSize, color, particleAmount, minSpeed) {
+    let restartPos = true;
+    if (restartMode == "restart") {restartPos = true}
+    else {restartPos = false};
+
     // Create update movement shader
     const velocityString = `vec2 velocity = vec2(${xComponent}, ${yComponent});`
     const updateShaderSource =
@@ -71,6 +77,7 @@ function main(xComponent, yComponent, visAmplitude, restartPos, pointSize, color
     ${updateShaderSourceAfterSpeed}`
 
     // Initialization
+    window.cancelAnimationFrame(lastFrameId);
     const canvas = document.querySelector("#c");
     const gl = canvas.getContext("webgl2");
     webglUtils.resizeCanvasToDisplaySize(gl.canvas);
@@ -88,6 +95,7 @@ function main(xComponent, yComponent, visAmplitude, restartPos, pointSize, color
         resolutionUpdateUniformLocation: gl.getUniformLocation(updateProgram, "u_resolution"),
         visAmpUniformLocation: gl.getUniformLocation(updateProgram, "u_visAmplitude"),
         restartPosUniformLocation: gl.getUniformLocation(updateProgram, "u_restartPos"),
+        minSpeedUniformLocation: gl.getUniformLocation(updateProgram, "u_minSpeed"),
 
         drawPosLocation: gl.getAttribLocation(drawProgram, "a_position"),
         resolutionUniformLocation: gl.getUniformLocation(drawProgram, "u_resolution"),
@@ -159,12 +167,13 @@ function main(xComponent, yComponent, visAmplitude, restartPos, pointSize, color
             gl.uniform2f(locations.resolutionUpdateUniformLocation, gl.canvas.width, gl.canvas.height);
             gl.uniform2f(locations.visAmpUniformLocation, visAmplitude[0], visAmplitude[1]);
             gl.uniform1f(locations.restartPosUniformLocation, restartPos);
+            gl.uniform1f(locations.minSpeedUniformLocation, minSpeed);
             gl.drawArrays(gl.POINTS, 0, particleAmount);
             
             gl.endTransformFeedback();
             gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null);
             gl.disable(gl.RASTERIZER_DISCARD);
-
+            
             // Draw the particles
             gl.useProgram(drawProgram);
             gl.bindVertexArray(currentState.drawVAO);
@@ -181,10 +190,10 @@ function main(xComponent, yComponent, visAmplitude, restartPos, pointSize, color
             nextState = temp;
         }
 
-        requestAnimationFrame(render);
+        lastFrameId = requestAnimationFrame(render);
     }
 
-    requestAnimationFrame(render);
+    lastFrameId = requestAnimationFrame(render);
 }   
 
-main("x / sqrt(x * x)", "10.0 * sin(x * x + y * y)", [50, 25], true, 1, [1, 1, 0.5, 1], 600000);
+//main("100.0", "100.0 * sin(x * x + y * y)", [50, 25], "restart", 1, [1, 1, 0.5, 1], 50000, 1);

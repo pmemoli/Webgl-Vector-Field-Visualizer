@@ -7,48 +7,40 @@
     <script src="helperFunc.js" defer></script>
     <script src="https://webgl2fundamentals.org/webgl/resources/webgl-utils.js" defer></script>
     <script src="graphics.js" defer></script>
+    <script src="script.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300&family=Kanit&family=Lato:wght@300&family=Roboto&family=Secular+One&family=Supermercado+One&display=swap" rel="stylesheet">
     <title>Vector Field Visualizer</title>
     <style>
         body {
             margin: 0;
+            background: black;
+            font-family: 'Lato', sans-serif;
         }
         canvas {
             margin: 0;
             width: 100%;
             height: 100%;
         }
-        #parameters {
-            color: white;
+        #paramBox {
             position: absolute;
-            top: 0%;
+            top: 0px;
+            left: 0px;
+            max-width: 4000px;
+            padding: 10px;
+            color: rgb(255, 255, 255);
+            background: rgba(23, 34, 59, 0.534);
+            border-radius: 3px;
+        }
+        #parameters {    
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
         }
     </style>
 </head>
 <body>
     <canvas id="c"></canvas>
-    <!-- 
-    <form id="parameters">
-        <span>Vector Field Parameters:</span><br>
-        <label for="X">X Component</label>
-        <input><br>
-        <label for="Y">Y Component</label>
-        <input><br>
-        <label for="Y">Particle Amount</label>
-        <input><br>
-        <label for="Y">Particle Size</label>
-        <input><br>
-        <label for="Y">X screen amplitude</label>
-        <input><br>
-        <label for="Y">Y screen amplitude</label>
-        <input><br>
-        <label for="Y">Color</label>
-        <input><br>
-        <button id="start">Start</button>
-        <input type="checkbox" id="offscreen" name="offscreen">
-        <label for="offscreen">Reset when off screen</label>
-        <input type="checkbox" id="lines" name="lines">
-        <label for="lines">Enable coordinate lines</label>
-    </form>
-    !-->
+    <div id="paramBox">
+    </div>
 </body>
 </html>
