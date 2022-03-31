@@ -1,19 +1,17 @@
-// TODO: Agregar modo congruencia, y dar UI.
+// TODO: Dar alguna memorizacion para los parametros. Escribir "help".
 const hideParametersHtmlSource = 
 `<button id="showParam">Show Parameters</button>`
 
-const parameterHtmlSource = 
+let parameterHtmlSource = 
 `<span>Vector Field Parameters:</span><br>
 
 <form id="parameters">
     <label for="X">X Component</label>
-    <input id="xComp" value="x">
+    <input id="xComp" value="x * y">
     <label for="Y">Y Component</label>
-    <input id="yComp" value="50.0 * sin(x*x + y*y)">
+    <input id="yComp" value="50.0 * sin(sqrt(x*x + y*y))">
     <label for="Y">Particle Amount</label>
     <input id="partAmount" value="400000">
-    <label for="Y">Particle Size</label>
-    <input id="partSize" value="1">
     <label for="Y">X screen amplitude</label>
     <input id="xAmp" value="50">
     <label for="Y">Y screen amplitude</label>
@@ -23,11 +21,11 @@ const parameterHtmlSource =
 </form>
 
 <span>Restart:</span>
-<input type="radio" id="congruence" name="restartType" value="congruence">
+<input type="radio" id="congruence" name="type" value="congruence">
 <label for="congruence">Congruence</label>
-<input type="radio" id="randomPos" name="randomPos" value="randomPos" checked>
+<input type="radio" id="randomPos" name="type" value="randomPos" checked>
 <label for="restart">Random Pos.</label>
-<input type="radio" id="noRestart" name="noRestart" value="noRestart">
+<input type="radio" id="noRestart" name="type" value="noRestart">
 <label for="noRestart">No restart</label><br>
 
 <button id="start">Start</button>
@@ -57,7 +55,6 @@ function runField() {
     const yComponent = document.getElementById("yComp").value;
     const xAmplitude = document.getElementById("xAmp").value;
     const yAmplitude = document.getElementById("yAmp").value;
-    const pointSize = document.getElementById("partSize").value;
     const particleAmount = document.getElementById("partAmount").value;
     const minSpeed = document.getElementById("minColSpeed").value;
 
@@ -78,7 +75,7 @@ function runField() {
         mode = "noRestart";
     }
 
-    main(xComponent, yComponent, [xAmplitude, yAmplitude], mode, pointSize, color, particleAmount, minSpeed);
+    main(xComponent, yComponent, [xAmplitude, yAmplitude], mode, color, particleAmount, minSpeed);
 }
 
 function hiddenParameterManagement() {

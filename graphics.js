@@ -5,8 +5,13 @@ in vec2 a_position;
 uniform vec2 u_resolution;
 uniform vec2 u_visAmplitude;
 uniform bool u_restartPos;
+uniform bool u_applyModulo;
 uniform float u_minSpeed;
 out vec2 v_outPos;
+
+vec2 modulo(vec2 n, vec2 m) { // For negative values
+    return mod(mod(n, m) + m, m);
+}
 
 highp float rand(vec2 co) {
     highp float a = 12.9898;
@@ -26,14 +31,21 @@ void main() {
 `
 
 const updateShaderSourceAfterSpeed = 
-    `if (!u_restartPos || ((0.0 <= a_position.x) && (a_position.x <= u_resolution.x) &&
-    (0.0 <= a_position.y) && (a_position.y <= u_resolution.y) && distance(vec2(0.0, 0.0), velocity) > u_minSpeed)) {
+    `if ((0.0 <= a_position.x) && (a_position.x <= u_resolution.x) &&    // If it's within bounds
+    (0.0 <= a_position.y) && (a_position.y <= u_resolution.y) && distance(vec2(0.0, 0.0), velocity) > u_minSpeed) {
         v_outPos = a_position + velocity * (0.01666666);  // Assumes 60fps
     }
-    else {
-        vec2 newPos = vec2(rand(a_position) * u_resolution.x, rand(vec2(a_position.x + 10.0, a_position.y + 17.0)) * u_resolution.y);
-        v_outPos = newPos + velocity * (0.01666666);  // Assumes 60fps
-        //v_outPos = a_position + velocity * (0.01666666);
+    else { // If the particle is outside the screen
+        if (u_restartPos) {
+            vec2 newPos = vec2(rand(a_position) * u_resolution.x, rand(vec2(a_position.x + 10.0, a_position.y + 17.0)) * u_resolution.y);
+            v_outPos = newPos + velocity * (0.01666666);
+        }
+        else if (u_applyModulo) {
+            v_outPos = modulo(a_position + velocity * (0.01666666), u_resolution);
+        }
+        else {
+            v_outPos = a_position + velocity * (0.01666666);
+        }
     }
 }`;
 
@@ -64,10 +76,16 @@ void main() {
 
 let lastFrameId = 0;
 
-function main(xComponent, yComponent, visAmplitude, restartMode, pointSize, color, particleAmount, minSpeed) {
-    let restartPos = true;
-    if (restartMode == "restart") {restartPos = true}
-    else {restartPos = false};
+function main(xComponent, yComponent, visAmplitude, restartMode, color, particleAmount, minSpeed) {
+    let restartPos = false;
+    let moduloPos = false;
+    console.log(restartMode);
+    if (restartMode == "restart") {
+        restartPos = true; moduloPos = false;
+    }
+    else if (restartMode == "modulo") {
+        restartPos = false; moduloPos = true;
+    }
 
     // Create update movement shader
     const velocityString = `vec2 velocity = vec2(${xComponent}, ${yComponent});`
@@ -95,11 +113,11 @@ function main(xComponent, yComponent, visAmplitude, restartMode, pointSize, colo
         resolutionUpdateUniformLocation: gl.getUniformLocation(updateProgram, "u_resolution"),
         visAmpUniformLocation: gl.getUniformLocation(updateProgram, "u_visAmplitude"),
         restartPosUniformLocation: gl.getUniformLocation(updateProgram, "u_restartPos"),
+        moduloPosUniformLocation: gl.getUniformLocation(updateProgram, "u_applyModulo"),
         minSpeedUniformLocation: gl.getUniformLocation(updateProgram, "u_minSpeed"),
 
         drawPosLocation: gl.getAttribLocation(drawProgram, "a_position"),
         resolutionUniformLocation: gl.getUniformLocation(drawProgram, "u_resolution"),
-        pointSizeUniformLoc: gl.getUniformLocation(drawProgram, "u_pointSize"),
         colorUniformLoc: gl.getUniformLocation(drawProgram, "u_color"),
     }
 
@@ -167,6 +185,7 @@ function main(xComponent, yComponent, visAmplitude, restartMode, pointSize, colo
             gl.uniform2f(locations.resolutionUpdateUniformLocation, gl.canvas.width, gl.canvas.height);
             gl.uniform2f(locations.visAmpUniformLocation, visAmplitude[0], visAmplitude[1]);
             gl.uniform1f(locations.restartPosUniformLocation, restartPos);
+            gl.uniform1f(locations.moduloPosUniformLocation, moduloPos);
             gl.uniform1f(locations.minSpeedUniformLocation, minSpeed);
             gl.drawArrays(gl.POINTS, 0, particleAmount);
             
@@ -181,7 +200,6 @@ function main(xComponent, yComponent, visAmplitude, restartMode, pointSize, colo
 
             gl.uniform2f(locations.resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
             gl.uniform4f(locations.colorUniformLoc, color[0], color[1], color[2], color[3]);
-            gl.uniform1f(locations.pointSize, pointSize);
             gl.drawArrays(gl.POINTS, 0, particleAmount);
 
             // Switch states
@@ -194,6 +212,4 @@ function main(xComponent, yComponent, visAmplitude, restartMode, pointSize, colo
     }
 
     lastFrameId = requestAnimationFrame(render);
-}   
-
-//main("100.0", "100.0 * sin(x * x + y * y)", [50, 25], "restart", 1, [1, 1, 0.5, 1], 50000, 1);
+}
