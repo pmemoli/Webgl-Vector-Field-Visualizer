@@ -43,6 +43,8 @@ Min Colored Speed: Minimum speed for drawn particles (pixels/s)
 
 Restart: Congruence makes the screen a toroid, Random Pos. puts particles in random positions after they are outside the screen, No Restart does nothing when particles go off the screen.`
 
+let updatedParam = null;
+
 function helpPopUp() {
     alert(popupText);
 }
@@ -60,13 +62,11 @@ function hexToRgbA(hex){
     throw new Error('Bad Hex');
 }
 
-
 let paramBox = document.getElementById("paramBox");
 
 function runField() {
     paramBox = document.getElementById("paramBox");
-    parameterHtmlSource = paramBox.innerHTML;
-    console.log(parameterHtmlSource);
+    updatedParam = paramBox.cloneNode(true);
 
     const xComponent = document.getElementById("xComp").value;
     const yComponent = document.getElementById("yComp").value;
@@ -104,7 +104,13 @@ function hiddenParameterManagement() {
 
 function showParameterManagement() {
     paramBox.innerHTML = '';
-    paramBox.insertAdjacentHTML('beforeend', parameterHtmlSource);
+    if (updatedParam == null) {
+        paramBox.insertAdjacentHTML('beforeend', parameterHtmlSource);
+    }
+    else {
+        paramBox.replaceWith(updatedParam);
+    }
+    
     let hideButton = document.getElementById("hideParam");
     let startButton = document.getElementById("start");
     let helpButton = document.getElementById("help");
