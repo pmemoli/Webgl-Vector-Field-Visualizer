@@ -34,6 +34,19 @@ let parameterHtmlSource =
 <span>Particle Color:</span>
 <input type="color" id="color" name="color" value="#e66465">`
 
+const popupText = 
+`X/Y Component: Vector field expression. Numbers must go with decimals (eg 1 should be 1.0)
+
+X/Y Screen Amplitude: Distance from center of screen to the sides
+
+Min Colored Speed: Minimum speed for drawn particles (pixels/s)
+
+Restart: Congruence makes the screen a toroid, Random Pos. puts particles in random positions after they are outside the screen, No Restart does nothing when particles go off the screen.`
+
+function helpPopUp() {
+    alert(popupText);
+}
+
 function hexToRgbA(hex){
     var c;
     if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
@@ -48,9 +61,13 @@ function hexToRgbA(hex){
 }
 
 
-const paramBox = document.getElementById("paramBox");
+let paramBox = document.getElementById("paramBox");
 
 function runField() {
+    paramBox = document.getElementById("paramBox");
+    parameterHtmlSource = paramBox.innerHTML;
+    console.log(parameterHtmlSource);
+
     const xComponent = document.getElementById("xComp").value;
     const yComponent = document.getElementById("yComp").value;
     const xAmplitude = document.getElementById("xAmp").value;
@@ -83,7 +100,6 @@ function hiddenParameterManagement() {
     paramBox.insertAdjacentHTML('beforeend', hideParametersHtmlSource);
     let button = document.getElementById("showParam");
     button.addEventListener("click", showParameterManagement);
-    
 }
 
 function showParameterManagement() {
@@ -91,8 +107,10 @@ function showParameterManagement() {
     paramBox.insertAdjacentHTML('beforeend', parameterHtmlSource);
     let hideButton = document.getElementById("hideParam");
     let startButton = document.getElementById("start");
+    let helpButton = document.getElementById("help");
     hideButton.addEventListener("click", hiddenParameterManagement);
     startButton.addEventListener("click", runField);
+    helpButton.addEventListener("click", helpPopUp);
 }
 
 showParameterManagement();
